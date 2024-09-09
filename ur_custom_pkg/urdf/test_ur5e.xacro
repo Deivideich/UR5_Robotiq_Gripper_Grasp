@@ -351,7 +351,7 @@
     <joint name="world-base" type="fixed">
         <parent link="world"/>
         <child link="base_link"/>
-        <origin rpy="0 0 0" xyz="0 0 0.6"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
     </joint>
     <!-- ROS-Industrial 'flange' frame: attachment point for EEF models -->
     <link name="flange" />
