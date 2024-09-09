@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <!-- Associate to the robot description parameter, the urdf file that model the robot-->
+    <param name="robot_description" command = "$(find xacro)/xacro  $(find ur_custom_pkg)/urdf/test_ur5e.xacro" />
+
+    <!-- <param name="cube_description" command = "$(find xacro)/xacro  $(find ur_custom_pkg)/urdf/cube.urdf.xacro" /> -->
+
+
+    <!-- Set teh position in empty world-->
+    <arg name="x" default="0" />
+    <arg name="y" default="0" />
+    <arg name="z" default="0.0" />
+    <arg name="R" default="0.0"/>
+    <arg name="P" default="0.0"/>
+    <arg name="Y" default="0.0"/>
+
+    <!-- put world file as argument-->
+    <arg name="world_file" default = "$(find ur_custom_pkg)/gazebo_worlds/urdf_test.world" />
+
+    <!-- Launch Gezabo world in paused-->
+    <include file = "$(find gazebo_ros)/launch/empty_world.launch" >
+        <arg name="use_sim_time" value="true"/>
+        <arg name="debug" value="false"/>
+        <arg name="gui" value="true"/>
+        <arg name="paused" value="true" />
+        <arg name="world_name" value="$(arg world_file)"/>
+    </include>   
+
+    <!-- Spawn the robot using the package gazebo_ros-->
+    <node name="spawn_the_robot" pkg="gazebo_ros" type="spawn_model"  output="screen" args="-urdf 
+    -param robot_description 
+    -J shoulder_pan_joint 0.502
+    -J shoulder_lift_joint -2.826
+    -J elbow_joint -1.359
+    -J wrist_1_joint 4.128
+    -J wrist_2_joint -1.134
+    -J wrist_3_joint 1.575
+    -model ur5e -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)" />
+    
+  <!-- Spawn the robot using the package gazebo_ros-->
+    <!-- <node name="spawn_the_cube" pkg="gazebo_ros" type="spawn_model"  output="screen" args="-urdf 
+    -param cube_description
+    -model cubeito -x 1 -y 1 -z 1 -R 0 -P 0 -Y 0" /> -->
+    <!-- Load the controllers-->
+
+    <rosparam command="load" file="$(find ur_custom_pkg)/config/ur5e_eff_controllers.yaml"/>
+
+
+     <!-- Load the node controller manager-->
+    <node name="controller_spawner" pkg="controller_manager" type="spawner"  
+            output="screen" respawn="false" ns="/ur5e"
+            args="joint_state_controller
+                eff_joint_traj_controller
+                gripper_controller
+                --timeout 60 ">        
+    </node>
+
+    <!-- Convert joint states to TF transform for rviz and rqt-->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"  
+            output="screen" respawn="false">
+            <remap from="/joint_states" to="/ur5e/joint_states"/>
+        
+    </node>
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <remap from="/joint_states" to="/ur5e/joint_states"/>
+
+    <include file= "$(find ur_robotiq_moveit_config)/launch/planning_context.launch" >
+        <arg name="load_robot_description" value="false" />
+    </include>
+
+    <include file= "$(find ur_robotiq_moveit_config)/launch/move_group.launch" >
+        <arg name="publish_monitored_planning_scene" value="true" />
+    </include>
+
+    <include file= "$(find ur_robotiq_moveit_config)/launch/moveit_rviz.launch" >
+        <arg name="rviz_config" value="$(find ur_robotiq_moveit_config)/launch/moveit.rviz" />
+    </include>
+
+
+</launch>

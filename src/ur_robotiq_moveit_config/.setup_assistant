@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: ur_custom_pkg
+    relative_path: urdf/test_ur5e.xacro
+    xacro_args: ""
+  SRDF:
+    relative_path: config/UR5E_CUSTOM.srdf
+  CONFIG:
+    author_name: david
+    author_email: david_vl2003@hotmail.com
+    generated_timestamp: 1725714931

@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <!-- Associate to the robot description parameter, the urdf file that model the robot-->
+    <param name="robot_description" command = "$(find xacro)/xacro  $(find ur_custom_pkg)/urdf/depth_camera.urdf" />
+
+    <!-- <param name="cube_description" command = "$(find xacro)/xacro  $(find ur_custom_pkg)/urdf/cube.urdf.xacro" /> -->
+
+
+    <!-- Set teh position in empty world-->
+    <arg name="x" default="0" />
+    <arg name="y" default="0" />
+    <arg name="z" default="0.6" />
+    <arg name="R" default="0.0"/>
+    <arg name="P" default="0.0"/>
+    <arg name="Y" default="0.0"/>
+
+    <!-- put world file as argument-->
+    <arg name="world_file" default = "$(find ur_custom_pkg)/gazebo_worlds/urdf_test.world" />
+
+    <!-- Launch Gezabo world in paused-->
+    <include file = "$(find gazebo_ros)/launch/empty_world.launch" >
+        <arg name="use_sim_time" value="true"/>
+        <arg name="debug" value="false"/>
+        <arg name="gui" value="true"/>
+        <arg name="paused" value="true" />
+        <!-- <arg name="world_name" value="$(arg world_file)"/> -->
+    </include>   
+
+    <!-- Spawn the robot using the package gazebo_ros-->
+    <node name="spawn_the_robot" pkg="gazebo_ros" type="spawn_model"  output="screen" args="-urdf 
+    -param robot_description 
+    -model ur5e -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)" />
+    
+  <!-- Spawn the robot using the package gazebo_ros-->
+    <!-- <node name="spawn_the_cube" pkg="gazebo_ros" type="spawn_model"  output="screen" args="-urdf 
+    -param cube_description
+    -model cubeito -x 1 -y 1 -z 1 -R 0 -P 0 -Y 0" /> -->
+    <!-- Load the controllers-->
+
+
+
+    <!-- Convert joint states to TF transform for rviz and rqt-->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"  
+            output="screen" respawn="false">        
+    </node>
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <remap from="/joint_states" to="/ur5e/joint_states"/>
+    
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ur_custom_pkg)/config/simple_robot.rviz" />
+
+
+</launch>
